@@ -1,4 +1,5 @@
 import gzip
+import math
 import logging
 import os
 import pickle
@@ -60,6 +61,12 @@ class Gwas:
             self.alt_freq = 1 - self.alt_freq
         except TypeError:
             self.alt_freq = None
+#    def convert_oric(self) :
+#        if self.or :
+#           self.b = math.log(self.or)
+#           self.ci_lower = self.ci.split(',')[0]
+#           self.ci_upper= self.ci.split(',')[1]
+#           self.se = (self.ci_lower - self.ci_upper)/1.96
 
     def check_reference_allele(self, fasta):
         try:
@@ -134,6 +141,8 @@ class Gwas:
         nea_col_num,
         effect_col_num,
         se_col_num,
+        or_col_num,
+        ci_col_num,
         pval_col_num,
         delimiter,
         header,
@@ -231,21 +240,35 @@ class Gwas:
                 logging.debug(f"Skipping: ref={ref} is the same as alt={alt}")
                 metadata["VariantsNotRead"] += 1
                 continue
-
-            try:
+            if effect_col_num :
+              try:
                 b = float(columns[effect_col_num])
-            except Exception as exception_name:
+              except Exception as exception_name:
                 logging.debug(f"Skipping {columns}: {exception_name}")
                 metadata["VariantsNotRead"] += 1
                 continue
 
-            try:
+              try:
                 se = float(columns[se_col_num])
-            except Exception as exception_name:
+              except Exception as exception_name:
                 logging.debug(f"Skipping {columns}: {exception_name}")
                 metadata["VariantsNotRead"] += 1
                 continue
-
+            elif or_col_num :
+              try :
+                 b = math.log(float(columns[or_col_num]))
+              except Exception as exception_name:
+                logging.debug(f"Skipping {columns}: {exception_name}")
+                metadata["VariantsNotRead"] += 1
+                continue
+              try :
+                 tmpor = columns[ci_col_num].split(',')
+                 se = (math.log(float(tmpor[1])) - math.log(float(tmpor[0])))/1.96
+              except Exception as exception_name:
+                logging.debug(f"Skipping {columns}: {exception_name}")
+                metadata["VariantsNotRead"] += 1
+                continue
+                 
             try:
                 pval = p_value_handler.parse_string(columns[pval_col_num])
                 nlog_pval = p_value_handler.neg_log_of_decimal(pval)

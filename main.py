@@ -107,7 +107,6 @@ def main():
     except marshmallow.exceptions.ValidationError as exception_name:
         logging.error(f"Could not validate json parameter file: {exception_name}")
         sys.exit()
-
     logging.info("Checking input arguments")
     if args.data is None:
         if "data" in json_data.keys():
@@ -171,6 +170,16 @@ def main():
     # read in data
     # harmonise, left align and trim on-the-fly and write to pickle format
     # keep file index for each record and chromosome position to write out karyotypically sorted records later
+    betah=None
+    seh=None
+    orh=None
+    ich=None
+    if 'beta_col' in json_data.keys() :
+        betah=json_data["beta_col"]
+        seh=json_data["se_col"]
+    if 'or_col' in json_data.keys() :
+       orh=json_data["or_col"]
+       ich=json_data["ic_col"]
     with pysam.FastaFile(args.ref) as fasta:
         gwas, idx, sample_metadata = Gwas.read_from_file(
             args.data,
@@ -179,8 +188,7 @@ def main():
             json_data["pos_col"],
             json_data["ea_col"],
             json_data["oa_col"],
-            json_data["beta_col"],
-            json_data["se_col"],
+            betah,seh,orh,ich,
             json_data["pval_col"],
             json_data["delimiter"],
             json_data["header"],

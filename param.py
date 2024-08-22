@@ -6,8 +6,10 @@ class Param(Schema):
     pos_col = fields.Int(required=True, description="Column number for base position")
     ea_col = fields.Int(required=True, description="Column number for effect allele")
     oa_col = fields.Int(required=True, description="Column number for other allele")
-    beta_col = fields.Int(required=True, description="Column number for effect")
-    se_col = fields.Int(required=True, description="Column number for standard error")
+    beta_col = fields.Int(required=False, description="Column number for effect", load_default=None)
+    se_col = fields.Int(required=False, description="Column number for standard error", load_default=None)
+    or_col = fields.Int(required=False, description="Column number for effect", load_default=None)
+    ic_col = fields.Int(required=False, description="Column number for standard error", load_default=None)
     pval_col = fields.Int(
         required=True, description="Column number for association P value"
     )
